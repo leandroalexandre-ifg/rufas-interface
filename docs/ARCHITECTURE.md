@@ -4,6 +4,8 @@ Este documento descreve o design arquitetural do sistema: as camadas, como se co
 
 ## Visão geral
 
+![Arquitetura geral](diagrams/01_overview.png)
+
 O sistema tem três camadas, separadas por responsabilidade e conectadas por uma API REST:
 
 ```
@@ -28,6 +30,8 @@ O sistema tem três camadas, separadas por responsabilidade e conectadas por uma
 **Princípio central:** o frontend não sabe nada sobre o RuFaS. Ele apenas coleta dados do produtor e exibe o que a API devolve. Toda a complexidade do modelo (árvore de arquivos, execução, formato do CSV) fica encapsulada no backend.
 
 ## Camada 1 — Frontend (Flutter)
+
+![Arquitetura do frontend](diagrams/03_frontend.png)
 
 ### Por que Flutter
 Uma única base de código gera o app para web, Android e (futuramente) iOS/macOS. Como o objetivo é alcançar produtores (celular) e também permitir uso no navegador, o multiplataforma de código único é decisivo.
@@ -59,6 +63,8 @@ Ponto de atenção específico do Flutter, centralizado em `api_client.dart`:
 - **macOS desktop (futuro):** requer habilitar `com.apple.security.network.client` nos entitlements, senão as chamadas HTTP falham silenciosamente.
 
 ## Camada 2 — Backend (Python / FastAPI)
+
+![Arquitetura do backend](diagrams/02_backend.png)
 
 ### Por que FastAPI
 Moderno, em Python (mesma linguagem do RuFaS, aproveitando o conhecimento da equipe), com documentação interativa automática (Swagger em `/docs`) e suporte nativo a execução assíncrona — necessário porque a simulação demora.

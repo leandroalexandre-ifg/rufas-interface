@@ -29,6 +29,8 @@ Uma interface em cinco etapas. O usuário responde poucas perguntas em linguagem
 
 ## Arquitetura em resumo
 
+![Arquitetura geral](docs/diagrams/01_overview.png)
+
 Três camadas conversando por uma API REST:
 
 ```
