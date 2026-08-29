@@ -1,0 +1,50 @@
+# Repositórios vendorizados/externos, cada um com seu próprio remote e
+# histórico — nunca fazem parte deste repo (ver CLAUDE.md, "Plataforma de
+# deploy e repositórios" e "Nova frente: interface produtor -> RuFaS").
+/RuFaS/
+/hf-space/
+
+# Ambientes virtuais Python
+.venv/
+venv/
+env/
+
+# Cache/bytecode Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Flutter/Dart — build artifacts e caches (regras específicas adicionais
+# já existem em flutter_app/.gitignore, mantidas por serem geradas pelo
+# `flutter create` e escopadas à própria pasta)
+build/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+
+# CSVs de saída de simulação (centenas de MB a ~1GB cada) e outros dados
+# grandes gerados localmente — a única exceção intencional (o CSV semanal
+# agregado, ~12MB) é destravada em dashboard/.gitignore.
+*.csv
+!dashboard/data/freestall_resultado_semanal.csv
+
+# Credenciais e segredos
+.env
+.env.*
+*.pem
+*.key
+*credentials*.json
+*secret*
+
+# Sistema operacional / editores
+.DS_Store
+.idea/
+.vscode/
+
+# Estado local de ferramentas (Claude Code) — configuração/skills
+# específicas da máquina, não faz parte do código do projeto.
+/.agents/
+/.claude/
