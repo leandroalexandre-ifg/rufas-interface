@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  O backend roda só localmente, sem HTTPS (ver CLAUDE.md — fase local, sem
+  deploy). O Android bloqueia tráfego HTTP puro por padrão a partir da API
+  28 em qualquer variante de build (o manifest de debug/profile do Flutter
+  contorna isso só para essas duas variantes, injetando a permissão de
+  INTERNET, mas não libera cleartext); sem isto, toda chamada de rede no
+  build release falha. Libera cleartext só para os hosts locais que
+  api_client.dart realmente usa (ver _resolveBaseUrl): localhost/127.0.0.1
+  (web/desktop) e 10.0.2.2 (endereço do host visto de dentro do emulador
+  Android).
+-->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">localhost</domain>
+        <domain includeSubdomains="false">127.0.0.1</domain>
+        <domain includeSubdomains="false">10.0.2.2</domain>
+    </domain-config>
+</network-security-config>

@@ -68,11 +68,11 @@ projetoRuFaS/
 
 ### Backend
 
-O backend importa a si mesmo como pacote (`from backend import ...`), então precisa rodar **a partir da raiz do projeto**, com a raiz no `PYTHONPATH`:
+O backend importa a si mesmo como pacote (`from backend import ...`), então precisa rodar **a partir da raiz do projeto**, com a raiz no `PYTHONPATH`. **E precisa também de `RuFaS/` no `PYTHONPATH`** — sem isso, `import RUFAS` (usado por `simulation_runner.py`) resolve para uma cópia antiga instalada em `RuFaS/venv/.../site-packages/RUFAS` (sem o submódulo `biophysical`) em vez do código-fonte real em `RuFaS/RUFAS/`, e qualquer simulação falha com `ModuleNotFoundError: No module named 'RUFAS.biophysical'`:
 
 ```bash
-source RuFaS/venv/bin/activate      # o venv do RuFaS, onde fastapi/uvicorn foram instalados
-PYTHONPATH=. uvicorn backend.app:app --reload --port 8000
+source RuFaS/venv/bin/activate       # o venv do RuFaS, onde fastapi/uvicorn foram instalados
+PYTHONPATH=.:RuFaS uvicorn backend.app:app --reload --port 8000
 ```
 A API sobe em `http://localhost:8000`. Documentação interativa automática em `http://localhost:8000/docs` (Swagger, gerado pelo FastAPI).
 
