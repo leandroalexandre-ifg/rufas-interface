@@ -4,10 +4,22 @@ PoC, chamando ``TaskManager.start()`` do RuFaS diretamente em processo
 FastAPI em 2026-08-27 (teste de fumaca, ver historico da sessao)."""
 
 import os
+import sys
 import traceback
 from pathlib import Path
 
 from backend import farm_translation as ft
+
+# O ambiente venv tem um `pip install` não-editável do RUFAS que ficou
+# incompleto (pyproject.toml lista só `packages = ["RUFAS"]`, sem
+# subpacotes — o pacote instalado em site-packages não tem
+# RUFAS.biophysical e similares). O código-fonte completo mora em
+# RUFAS_ROOT/RUFAS. Sem isto, dependendo de como o processo do backend é
+# iniciado (ex.: rodando o script `uvicorn` do venv diretamente em vez de
+# `python -m uvicorn`), sys.path não segue o `os.chdir` feito abaixo e o
+# import cai no pacote instalado quebrado.
+if str(ft.RUFAS_ROOT) not in sys.path:
+    sys.path.insert(0, str(ft.RUFAS_ROOT))
 
 
 def _run_task_manager(metadata_path: Path, output_directory: Path, logs_directory: Path) -> None:
