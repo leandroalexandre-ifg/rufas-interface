@@ -1,0 +1,761 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700;900&display=swap">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: 'Work Sans', ui-sans-serif, system-ui, -apple-system, sans-serif; }
+    a { color: #1B4D3E; }
+    a:hover { color: #12362B; }
+    input { font-family: inherit; outline: none; }
+    input:focus { border-color: #1B4D3E !important; }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  </style>
+</helmet>
+
+<div style="width:1440px;height:900px;overflow:hidden;background:#FAF7F0;display:flex;color:#26332C;">
+
+  <!-- Sidebar (sempre visivel no desktop, sem drawer) -->
+  <div style="width:300px;min-width:300px;height:900px;background:#FFFFFF;border-right:1px solid rgba(27,77,62,0.14);display:flex;flex-direction:column;">
+    <div style="padding:28px 24px 18px 24px;display:flex;align-items:center;gap:12px;">
+      <svg width="34" height="34" viewBox="0 0 100 100" fill="none"><path d="M50 6 C50 6 84 46 84 66 C84 85 68.5 96 50 96 C31.5 96 16 85 16 66 C16 46 50 6 50 6 Z" fill="#1B4D3E"/><polyline points="29,68 44,54 55,61 73,38" stroke="#F4C15C" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+      <div>
+        <div style="font-weight:900;font-size:20px;color:#1B4D3E;letter-spacing:-0.4px;">RuFaS</div>
+        <div style="font-size:11px;color:#5B6B62;">Simulador de Fazenda</div>
+      </div>
+    </div>
+    <div style="height:1px;background:rgba(27,77,62,0.14);margin:0 24px;"></div>
+
+    <div style="padding:20px 24px;overflow-y:auto;flex:1;">
+      <div style="font-size:11px;font-weight:800;letter-spacing:0.6px;color:#5B6B62;text-transform:uppercase;">Fazenda ativa</div>
+      <div style="margin-top:10px;border:1px solid rgba(27,77,62,0.16);border-radius:16px;padding:14px;">
+        <div style="font-weight:700;font-size:14px;">{{activeFarmLabel}}</div>
+        <div style="font-size:12px;color:#5B6B62;margin-top:2px;">{{activeFarmState}}</div>
+      </div>
+
+      <div style="font-size:11px;font-weight:800;letter-spacing:0.6px;color:#5B6B62;text-transform:uppercase;margin-top:24px;">Trocar fazenda</div>
+      <div style="margin-top:8px;display:flex;flex-direction:column;gap:4px;">
+        <sc-for list="{{drawerFarmItems}}" as="d" hint-placeholder-count="3">
+          <div onClick="{{d.onSelect}}" style="display:flex;align-items:center;gap:10px;padding:10px 8px;border-radius:12px;background:{{d.rowBg}};cursor:pointer;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 21V10L12 4L20 10V21H14V15H10V21H4Z" stroke="#1B4D3E" stroke-width="1.6" stroke-linejoin="round"/></svg>
+            <div style="font-size:13px;font-weight:600;">{{d.label}}</div>
+            <sc-if value="{{d.isActive}}" hint-placeholder-val="{{false}}">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="margin-left:auto;"><path d="M5 13L9.5 17.5L19 7" stroke="#1B4D3E" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="font-size:11px;font-weight:800;letter-spacing:0.6px;color:#5B6B62;text-transform:uppercase;margin-top:24px;">Navegação</div>
+      <div onClick="{{backToList}}" style="display:flex;align-items:center;gap:10px;padding:10px 8px;border-radius:12px;background:#EFE6D6;margin-top:8px;cursor:pointer;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 21V10L12 4L20 10V21H14V15H10V21H4Z" stroke="#1B4D3E" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        <div style="font-size:13px;font-weight:700;">Minhas Fazendas</div>
+      </div>
+    </div>
+
+    <div style="height:1px;background:rgba(27,77,62,0.14);margin:0 24px;"></div>
+    <div style="padding:18px 24px;font-size:12px;color:#5B6B62;">Precisa de ajuda? Fale com o técnico da sua região.</div>
+  </div>
+
+  <!-- Conteudo principal -->
+  <div style="flex:1;height:900px;overflow-y:auto;padding:44px 56px;">
+
+    <!-- back link para telas que nao sao a lista -->
+    <sc-if value="{{contentBackVisible}}" hint-placeholder-val="{{false}}">
+      <div onClick="{{contentBackAction}}" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:#5B6B62;cursor:pointer;margin-bottom:20px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M15 18L9 12L15 6" stroke="#5B6B62" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        {{contentBackLabel}}
+      </div>
+    </sc-if>
+
+    <!-- SCREEN: LIST -->
+    <sc-if value="{{isList}}" hint-placeholder-val="{{true}}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;">
+        <div>
+          <div style="font-weight:900;font-size:38px;line-height:0.95;letter-spacing:-1px;color:#1B4D3E;">Minhas fazendas</div>
+          <div style="margin-top:8px;font-size:14px;color:#5B6B62;">Escolha sobre qual fazenda você quer trabalhar hoje.</div>
+        </div>
+        <div onClick="{{openWizardFromList}}" style="display:inline-flex;align-items:center;gap:8px;background:#1B4D3E;color:#FAF7F0;font-weight:700;font-size:14px;padding:14px 22px;border-radius:999px;cursor:pointer;white-space:nowrap;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 5V19M5 12H19" stroke="#FAF7F0" stroke-width="2.4" stroke-linecap="round"/></svg>
+          Cadastrar nova fazenda
+        </div>
+      </div>
+
+      <div style="margin-top:32px;display:grid;grid-template-columns:repeat(2, minmax(0, 1fr));gap:20px;">
+        <sc-for list="{{farmItems}}" as="farm" hint-placeholder-count="3">
+          <div onClick="{{farm.onOpen}}" style="background:#FFFFFF;border-radius:20px;padding:22px;border:{{farm.cardBorder}};cursor:pointer;">
+            <div style="display:flex;align-items:flex-start;gap:14px;">
+              <div style="width:48px;height:48px;border-radius:999px;background:#EFE6D6;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 21V10L12 4L20 10V21H14V15H10V21H4Z" stroke="#1B4D3E" stroke-width="1.8" stroke-linejoin="round"/></svg>
+              </div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-weight:700;font-size:16px;">{{farm.label}}</div>
+                <div style="margin-top:2px;font-size:12px;color:#5B6B62;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{farm.meta}}</div>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+                <div style="background:{{farm.chipBg}};color:{{farm.chipFg}};font-size:11px;font-weight:700;letter-spacing:0.3px;padding:4px 10px;border-radius:999px;text-transform:uppercase;">{{farm.chipLabel}}</div>
+                <sc-if value="{{farm.isActive}}" hint-placeholder-val="{{false}}">
+                  <div style="background:#F4C15C;color:#26332C;font-size:10px;font-weight:800;padding:3px 9px;border-radius:999px;text-transform:uppercase;">Selecionada</div>
+                </sc-if>
+              </div>
+            </div>
+            <div style="display:flex;gap:10px;margin-top:18px;">
+              <div onClick="{{farm.onSelect}}" style="flex:1;text-align:center;background:{{farm.selectBg}};color:{{farm.selectFg}};font-weight:700;font-size:13px;padding:11px;border-radius:14px;cursor:pointer;">{{farm.selectLabel}}</div>
+              <div onClick="{{farm.onViewResultsClick}}" style="flex:1;text-align:center;border:1.5px solid {{farm.resultsBorder}};color:{{farm.resultsColor}};font-weight:700;font-size:13px;padding:10px;border-radius:14px;cursor:pointer;">Ver resultados</div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <!-- SCREEN: WIZARD -->
+    <sc-if value="{{isWizard}}" hint-placeholder-val="{{false}}">
+      <div style="max-width:640px;margin:0 auto;">
+        <sc-if value="{{wizardShowProgress}}" hint-placeholder-val="{{true}}">
+          <div style="margin-bottom:20px;">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;">
+              <div style="font-weight:800;font-size:13px;color:#1B4D3E;">{{wizardStepLabel}}</div>
+              <div style="font-size:13px;color:#5B6B62;">{{wizardStepName}}</div>
+            </div>
+            <div style="display:flex;gap:6px;margin-top:10px;">
+              <div style="flex:1;height:6px;border-radius:999px;background:{{wizardBar1}};"></div>
+              <div style="flex:1;height:6px;border-radius:999px;background:{{wizardBar2}};"></div>
+              <div style="flex:1;height:6px;border-radius:999px;background:{{wizardBar3}};"></div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{wizardStepIs1}}" hint-placeholder-val="{{true}}">
+          <div style="background:#FFFFFF;border-radius:20px;padding:32px;">
+            <div style="font-weight:900;font-size:26px;color:#1B4D3E;letter-spacing:-0.5px;">Seu rebanho</div>
+            <div style="margin-top:8px;font-size:13px;color:#5B6B62;">A qualquer momento, correções podem ser realizadas nos campos abaixo.</div>
+
+            <div style="display:grid;grid-template-columns:repeat(2, minmax(0,1fr));gap:24px;margin-top:28px;">
+              <div>
+                <div style="font-weight:700;font-size:15px;">Quantas vacas estão dando leite?</div>
+                <div style="font-size:12px;color:#5B6B62;margin-top:3px;">As vacas em lactação, que você ordenha hoje.</div>
+                <div style="display:flex;align-items:center;gap:10px;margin-top:12px;">
+                  <div onClick="{{decCow}}" style="width:44px;height:44px;border-radius:999px;background:#EFE6D6;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12H19" stroke="#1B4D3E" stroke-width="2.4" stroke-linecap="round"/></svg>
+                  </div>
+                  <input type="text" inputmode="numeric" value="{{cowNum}}" onChange="{{onCowNumChange}}" style="flex:1;text-align:center;font-size:20px;font-weight:700;border:1.5px solid rgba(27,77,62,0.18);border-radius:14px;padding:10px;color:#1B4D3E;"/>
+                  <div onClick="{{incCow}}" style="width:44px;height:44px;border-radius:999px;background:#EFE6D6;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 5V19M5 12H19" stroke="#1B4D3E" stroke-width="2.4" stroke-linecap="round"/></svg>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <div style="font-weight:700;font-size:15px;">Quantas bezerras você tem?</div>
+                <div style="font-size:12px;color:#5B6B62;margin-top:3px;">As fêmeas novas, que ainda não tiveram cria.</div>
+                <div style="display:flex;align-items:center;gap:10px;margin-top:12px;">
+                  <div onClick="{{decCalf}}" style="width:44px;height:44px;border-radius:999px;background:#EFE6D6;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12H19" stroke="#1B4D3E" stroke-width="2.4" stroke-linecap="round"/></svg>
+                  </div>
+                  <input type="text" inputmode="numeric" value="{{calfNum}}" onChange="{{onCalfNumChange}}" style="flex:1;text-align:center;font-size:20px;font-weight:700;border:1.5px solid rgba(27,77,62,0.18);border-radius:14px;padding:10px;color:#1B4D3E;"/>
+                  <div onClick="{{incCalf}}" style="width:44px;height:44px;border-radius:999px;background:#EFE6D6;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 5V19M5 12H19" stroke="#1B4D3E" stroke-width="2.4" stroke-linecap="round"/></svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{wizardStepIs2}}" hint-placeholder-val="{{false}}">
+          <div style="background:#FFFFFF;border-radius:20px;padding:32px;">
+            <div style="font-weight:900;font-size:26px;color:#1B4D3E;letter-spacing:-0.5px;">Sua produção</div>
+            <div style="margin-top:8px;font-size:13px;color:#5B6B62;">Uma pergunta só, sobre o leite do dia a dia.</div>
+            <div style="margin-top:28px;font-weight:700;font-size:15px;">Meta de produção de leite anual</div>
+            <div style="font-size:12px;color:#5B6B62;margin-top:3px;">É um alvo de calibração da simulação, não uma garantia de resultado.</div>
+            <div style="display:flex;align-items:center;margin-top:12px;border:1.5px solid rgba(27,77,62,0.18);border-radius:14px;padding:4px 16px;max-width:320px;">
+              <input type="text" inputmode="decimal" placeholder="0" value="{{milkYield}}" onChange="{{onMilkYieldChange}}" style="flex:1;border:none;font-size:22px;font-weight:700;padding:10px 0;color:#1B4D3E;background:transparent;"/>
+              <div style="font-size:14px;color:#5B6B62;font-weight:600;">kg/ano</div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{wizardStepIs3}}" hint-placeholder-val="{{false}}">
+          <div style="background:#FFFFFF;border-radius:20px;padding:32px;">
+            <div style="font-weight:900;font-size:26px;color:#1B4D3E;letter-spacing:-0.5px;">Sua propriedade</div>
+            <div style="margin-top:8px;font-size:13px;color:#5B6B62;">Onde fica e qual o tamanho da terra.</div>
+
+            <div style="display:grid;grid-template-columns:repeat(2, minmax(0,1fr));gap:24px;margin-top:24px;">
+              <div>
+                <div style="font-weight:700;font-size:15px;">Tamanho do campo 1</div>
+                <div style="display:flex;align-items:center;margin-top:10px;border:1.5px solid rgba(27,77,62,0.18);border-radius:14px;padding:4px 16px;">
+                  <input type="text" inputmode="decimal" placeholder="0" value="{{field1}}" onChange="{{onField1Change}}" style="flex:1;border:none;font-size:20px;font-weight:700;padding:9px 0;color:#1B4D3E;background:transparent;"/>
+                  <div style="font-size:14px;color:#5B6B62;font-weight:600;">acres</div>
+                </div>
+              </div>
+              <div>
+                <div style="font-weight:700;font-size:15px;">Tamanho do campo 2</div>
+                <div style="display:flex;align-items:center;margin-top:10px;border:1.5px solid rgba(27,77,62,0.18);border-radius:14px;padding:4px 16px;">
+                  <input type="text" inputmode="decimal" placeholder="0" value="{{field2}}" onChange="{{onField2Change}}" style="flex:1;border:none;font-size:20px;font-weight:700;padding:9px 0;color:#1B4D3E;background:transparent;"/>
+                  <div style="font-size:14px;color:#5B6B62;font-weight:600;">acres</div>
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-top:24px;max-width:320px;">
+              <div style="font-weight:700;font-size:15px;">Código do condado (FIPS)</div>
+              <div style="font-size:12px;color:#5B6B62;margin-top:3px;">Define a região e o clima usados na simulação.</div>
+              <div style="display:flex;align-items:center;margin-top:10px;border:1.5px solid rgba(27,77,62,0.18);border-radius:14px;padding:4px 16px;">
+                <input type="text" inputmode="numeric" placeholder="0" value="{{fips}}" onChange="{{onFipsChange}}" style="flex:1;border:none;font-size:20px;font-weight:700;padding:9px 0;color:#1B4D3E;background:transparent;"/>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{wizardStepIs4}}" hint-placeholder-val="{{false}}">
+          <div style="background:#FFFFFF;border-radius:20px;padding:32px;">
+            <div style="font-weight:900;font-size:26px;color:#1B4D3E;letter-spacing:-0.5px;">Confira antes de enviar</div>
+            <div style="margin-top:8px;font-size:13px;color:#5B6B62;">Está tudo certo? Se algo mudou, é só voltar e ajustar.</div>
+
+            <div style="display:grid;grid-template-columns:repeat(3, minmax(0,1fr));gap:16px;margin-top:22px;">
+              <sc-for list="{{reviewGroups}}" as="group" hint-placeholder-count="3">
+                <div style="background:#FAF7F0;border:1px solid rgba(27,77,62,0.14);border-radius:16px;padding:16px;">
+                  <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <div style="font-weight:800;font-size:14px;color:#1B4D3E;">{{group.title}}</div>
+                    <div onClick="{{group.onEdit}}" style="font-size:12px;font-weight:700;color:#5B6B62;cursor:pointer;padding:6px 8px;margin:-6px -8px;">Alterar</div>
+                  </div>
+                  <sc-for list="{{group.items}}" as="row" hint-placeholder-count="2">
+                    <div style="margin-top:10px;">
+                      <div style="font-size:11px;color:#5B6B62;">{{row.label}}</div>
+                      <div style="font-weight:700;font-size:14px;margin-top:1px;">{{row.value}}</div>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{wizardStepIs5}}" hint-placeholder-val="{{false}}">
+          <div style="background:#FFFFFF;border-radius:20px;padding:44px;text-align:center;">
+            <div style="width:80px;height:80px;border-radius:999px;background:#F4C15C;display:flex;align-items:center;justify-content:center;margin:0 auto;">
+              <svg width="38" height="38" viewBox="0 0 24 24" fill="none"><path d="M5 13L9.5 17.5L19 7" stroke="#26332C" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div style="margin-top:22px;font-weight:900;font-size:24px;color:#1B4D3E;">Cadastro enviado</div>
+            <div style="margin-top:10px;font-size:14px;color:#5B6B62;line-height:1.5;max-width:420px;margin-left:auto;margin-right:auto;">Recebemos as informações da sua fazenda. A simulação já começou — pode levar cerca de 10 minutos.</div>
+            <div style="display:flex;gap:12px;justify-content:center;margin-top:26px;">
+              <div onClick="{{goToStatusFromConfirm}}" style="background:#1B4D3E;color:#FAF7F0;font-weight:700;font-size:14px;padding:13px 24px;border-radius:999px;cursor:pointer;">Acompanhar simulação</div>
+              <div onClick="{{goToListFromConfirm}}" style="border:1.5px solid #1B4D3E;color:#1B4D3E;font-weight:700;font-size:14px;padding:13px 24px;border-radius:999px;cursor:pointer;">Voltar para minhas fazendas</div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{showWizardFooter}}" hint-placeholder-val="{{false}}">
+          <div style="display:flex;gap:12px;margin-top:20px;justify-content:flex-end;">
+            <sc-if value="{{wizardShowBack}}" hint-placeholder-val="{{false}}">
+              <div onClick="{{onWizardBack}}" style="border:1.5px solid #1B4D3E;color:#1B4D3E;font-weight:700;font-size:14px;padding:12px 22px;border-radius:999px;cursor:pointer;">Voltar</div>
+            </sc-if>
+            <div onClick="{{onWizardNext}}" style="background:{{wizardNextBg}};color:#FAF7F0;font-weight:700;font-size:14px;padding:12px 26px;border-radius:999px;cursor:pointer;">{{wizardNextLabel}}</div>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <!-- SCREEN: STATUS -->
+    <sc-if value="{{isStatus}}" hint-placeholder-val="{{false}}">
+      <div style="max-width:640px;margin:40px auto 0 auto;background:#FFFFFF;border-radius:20px;padding:36px;">
+        <sc-if value="{{statusIsProgress}}" hint-placeholder-val="{{true}}">
+          <div style="display:flex;align-items:center;gap:24px;">
+            <div style="width:64px;height:64px;border:5px solid rgba(27,77,62,0.15);border-top-color:#1B4D3E;border-radius:999px;flex-shrink:0;animation:spin 1s linear infinite;"></div>
+            <div>
+              <div style="font-weight:900;font-size:22px;color:#1B4D3E;">Simulando</div>
+              <div style="margin-top:8px;font-size:13px;color:#5B6B62;">Rodando a simulação completa da fazenda.</div>
+            </div>
+          </div>
+          <div style="margin-top:22px;font-size:12px;color:#5B6B62;line-height:1.5;">Isso pode levar cerca de 10 minutos. Você pode sair desta tela — a simulação continua rodando e vai aparecer pronta na lista de fazendas.</div>
+        </sc-if>
+        <sc-if value="{{statusIsFailed}}" hint-placeholder-val="{{false}}">
+          <div style="display:flex;align-items:flex-start;gap:24px;">
+            <div style="width:64px;height:64px;border-radius:999px;background:#B3261E;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none"><path d="M12 8V13M12 16.5V16.51" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round"/><circle cx="12" cy="12" r="9" stroke="#FFFFFF" stroke-width="2"/></svg>
+            </div>
+            <div>
+              <div style="font-weight:900;font-size:20px;color:#1B4D3E;">Não foi possível concluir a simulação</div>
+              <div style="margin-top:8px;font-size:13px;color:#5B6B62;line-height:1.5;">Algo deu errado durante o processamento dessa fazenda. Tente cadastrar novamente ou fale com o suporte técnico.</div>
+            </div>
+          </div>
+          <div onClick="{{toggleErrorDetails}}" style="margin-top:20px;border:1px solid rgba(27,77,62,0.16);border-radius:14px;padding:16px;cursor:pointer;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div style="font-weight:700;font-size:13px;">Detalhes técnicos</div>
+              <div style="font-size:12px;color:#5B6B62;">{{errorDetailsToggleLabel}}</div>
+            </div>
+            <sc-if value="{{errorDetailsOpen}}" hint-placeholder-val="{{false}}">
+              <div style="margin-top:10px;font-family:monospace;font-size:12px;color:#5B6B62;line-height:1.6;white-space:pre-wrap;">{{sampleErrorText}}</div>
+            </sc-if>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <!-- SCREEN: RESULTS (2 colunas no desktop) -->
+    <sc-if value="{{isResults}}" hint-placeholder-val="{{false}}">
+      <div style="display:flex;gap:32px;align-items:flex-start;">
+        <div style="flex:1;">
+          <div style="font-weight:900;font-size:28px;color:#1B4D3E;letter-spacing:-0.5px;">Resultados</div>
+          <div style="font-weight:800;font-size:14px;margin-top:24px;">Módulo</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;">
+            <sc-for list="{{moduleChips}}" as="chip" hint-placeholder-count="4">
+              <div onClick="{{chip.onToggle}}" style="background:{{chip.bg}};color:{{chip.fg}};border:1.5px solid {{chip.border}};font-size:13px;font-weight:700;padding:9px 16px;border-radius:999px;cursor:pointer;">{{chip.name}}</div>
+            </sc-for>
+          </div>
+
+          <div style="font-weight:800;font-size:14px;margin-top:24px;">Palavra-chave</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;">
+            <sc-for list="{{keywordChips}}" as="chip" hint-placeholder-count="4">
+              <div onClick="{{chip.onToggle}}" style="background:{{chip.bg}};color:{{chip.fg}};border:1.5px solid {{chip.border}};font-size:13px;font-weight:700;padding:9px 16px;border-radius:999px;cursor:pointer;">{{chip.name}}</div>
+            </sc-for>
+          </div>
+
+          <div onClick="{{toggleAdvanced}}" style="margin-top:24px;border:1px solid rgba(27,77,62,0.16);border-radius:14px;padding:16px;cursor:pointer;max-width:520px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div style="font-weight:700;font-size:13px;">Avançado (padrão de busca)</div>
+              <div style="font-size:12px;color:#5B6B62;">{{advancedToggleLabel}}</div>
+            </div>
+            <sc-if value="{{advancedOpen}}" hint-placeholder-val="{{false}}">
+              <div style="margin-top:10px;font-size:12px;color:#5B6B62;line-height:1.5;">Mesmo mecanismo usado pelos filtros nativos do RuFaS. Editar aqui substitui o filtro por módulo e palavra-chave acima.</div>
+              <div style="margin-top:8px;font-family:monospace;font-size:12px;background:#FAF7F0;border:1px solid rgba(27,77,62,0.14);border-radius:10px;padding:10px;color:#1B4D3E;">{{regexPreview}}</div>
+            </sc-if>
+          </div>
+        </div>
+
+        <div style="width:300px;flex-shrink:0;position:sticky;top:0;background:#FFFFFF;border-radius:20px;padding:22px;border:1px solid rgba(27,77,62,0.14);">
+          <div style="font-weight:800;font-size:14px;">Resumo do filtro</div>
+          <div style="margin-top:12px;font-size:32px;font-weight:900;color:#1B4D3E;line-height:1;">{{selectedCount}}</div>
+          <div style="margin-top:4px;font-size:12px;color:#5B6B62;">colunas selecionadas (colunas de tempo sempre incluídas)</div>
+          <div onClick="{{openChart}}" style="margin-top:20px;text-align:center;background:{{resultsCtaBg}};color:#FAF7F0;font-weight:700;font-size:14px;padding:13px;border-radius:999px;cursor:pointer;">Ver gráfico</div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- SCREEN: CHART (2 colunas no desktop) -->
+    <sc-if value="{{isChart}}" hint-placeholder-val="{{false}}">
+      <div style="display:flex;gap:32px;align-items:flex-start;">
+        <div style="width:360px;flex-shrink:0;">
+          <div style="font-weight:900;font-size:28px;color:#1B4D3E;letter-spacing:-0.5px;">Gráfico</div>
+          <div style="font-size:13px;color:#5B6B62;margin-top:10px;">Escolha até 3 variáveis para plotar ({{selectedVarsCount}}/3 selecionadas).</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:14px;border:1.5px solid rgba(27,77,62,0.18);border-radius:999px;padding:10px 16px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#5B6B62" stroke-width="2"/><path d="M21 21L16.5 16.5" stroke="#5B6B62" stroke-width="2" stroke-linecap="round"/></svg>
+            <input type="text" placeholder="Buscar variável..." value="{{chartSearch}}" onChange="{{onChartSearchChange}}" style="flex:1;border:none;font-size:13px;background:transparent;"/>
+          </div>
+
+          <div style="margin-top:14px;display:flex;flex-direction:column;gap:6px;max-height:420px;overflow-y:auto;">
+            <sc-for list="{{chartCandidateItems}}" as="item" hint-placeholder-count="4">
+              <div onClick="{{item.onToggle}}" style="display:flex;align-items:center;gap:12px;padding:10px 4px;opacity:{{item.opacity}};cursor:pointer;">
+                <div style="width:22px;height:22px;border-radius:6px;border:2px solid {{item.boxBorder}};background:{{item.boxBg}};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                  <sc-if value="{{item.selected}}" hint-placeholder-val="{{false}}">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M5 13L9.5 17.5L19 7" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </sc-if>
+                </div>
+                <div style="min-width:0;">
+                  <div style="font-weight:700;font-size:13px;">{{item.short}}</div>
+                  <div style="font-size:11px;color:#5B6B62;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{item.full}}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div onClick="{{generateCharts}}" style="margin-top:18px;text-align:center;background:{{generateBg}};color:{{generateFg}};font-weight:700;font-size:14px;padding:13px;border-radius:999px;cursor:pointer;">{{generateLabel}}</div>
+        </div>
+
+        <div style="flex:1;">
+          <sc-if value="{{chartsGenerated}}" hint-placeholder-val="{{false}}">
+            <div style="display:grid;grid-template-columns:repeat(2, minmax(0,1fr));gap:16px;">
+              <sc-for list="{{chartCards}}" as="card" hint-placeholder-count="1">
+                <div style="background:#FFFFFF;border:1px solid rgba(27,77,62,0.14);border-radius:18px;padding:18px;">
+                  <div style="font-weight:700;font-size:14px;">{{card.short}}</div>
+                  <div style="margin-top:2px;font-size:11px;color:#5B6B62;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{card.full}}</div>
+                  <svg width="100%" height="140" viewBox="0 0 260 120" style="margin-top:12px;" preserveAspectRatio="none">
+                    <polyline points="{{card.points}}" fill="none" stroke="#1B4D3E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  <div style="display:flex;justify-content:space-between;font-size:11px;color:#5B6B62;margin-top:4px;">
+                    <div>min {{card.minLabel}}</div>
+                    <div>max {{card.maxLabel}}</div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{chartEmptyVisible}}" hint-placeholder-val="{{true}}">
+            <div style="height:420px;border:1.5px dashed rgba(27,77,62,0.25);border-radius:20px;display:flex;align-items:center;justify-content:center;text-align:center;padding:40px;">
+              <div style="font-size:14px;color:#5B6B62;max-width:280px;">Selecione até 3 variáveis à esquerda e clique em "Gerar gráfico" para ver a prévia aqui.</div>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+    </sc-if>
+
+  </div>
+</div>
+</x-dc>
+
+<script data-dc-script>
+const FARMS = [
+  { id: 'f1', cow: 120, calf: 40, sim: 'a1b2c3d4e5f6', date: '28/08 14:32', state: 'done' },
+  { id: 'f2', cow: 80, calf: 25, sim: '7c9e2f10ab33', date: '30/08 09:15', state: 'running_simulation' },
+  { id: 'f3', cow: 200, calf: 60, sim: 'b2229cd718be', date: '31/08 19:40', state: 'failed' },
+];
+const STATE_LABEL = { done: 'concluída', running_simulation: 'simulando', failed: 'falhou' };
+const STATE_BG = { done: '#1B4D3E', running_simulation: '#F4C15C', failed: '#B3261E' };
+const STATE_FG = { done: '#FAF7F0', running_simulation: '#26332C', failed: '#FFFFFF' };
+
+const MODULES = ['AnimalModuleReporter', 'FieldModuleReporter', 'ManureModuleReporter', 'MilkProductionReporter'];
+const KEYWORDS = ['milk', 'methane', 'nitrogen', 'population'];
+
+const CANDIDATE_VARS = [
+  { key: 'pop', full: 'AnimalModuleReporter.report_animal_population_statistics.population_number_of_lactating_cows (animals)' },
+  { key: 'milk', full: 'MilkProductionReporter.report_daily_milk_production.daily_milk_production (kg)' },
+  { key: 'methane', full: 'AnimalModuleReporter.report_methane_emissions.enteric_methane (kg)' },
+  { key: 'nitrogen', full: 'FieldModuleReporter.report_nitrogen_balance.soil_nitrogen (kg/ha)' },
+];
+const SAMPLE_SERIES = {
+  pop: [12, 12, 13, 14, 15, 15, 16, 17, 18, 19, 20, 21, 21, 22, 23, 24, 25, 26, 27, 28],
+  milk: [1800, 1820, 1850, 1900, 1950, 2000, 2050, 2100, 2120, 2150, 2200, 2250, 2300, 2350, 2400, 2420, 2450, 2480, 2500, 2550],
+  methane: [300, 305, 310, 315, 318, 322, 328, 332, 338, 342, 348, 352, 356, 360, 365, 368, 372, 376, 380, 385],
+  nitrogen: [40, 42, 39, 41, 45, 43, 46, 44, 48, 46, 50, 47, 52, 49, 53, 51, 55, 52, 56, 54],
+};
+
+const SAMPLE_ERROR = "Herd init nao gerou animal_population em output/farm_b2229cd718be/animals.\nTraceback (most recent call last):\n  File \"backend/simulation_runner.py\", line 59, in run_full_simulation\n    population_path = ft.find_generated_population_file(simulation_id)\nFileNotFoundError: Herd init nao gerou animal_population para simulation_id=b2229cd718be.";
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = {
+      screen: 'list',
+      activeFarmId: 'f1',
+      wizardStep: 1,
+      cowNum: '0', calfNum: '0', milkYield: '', field1: '', field2: '', fips: '',
+      statusView: 'progress',
+      errorDetailsOpen: false,
+      selectedModules: [],
+      selectedKeywords: [],
+      advancedOpen: false,
+      chartSearch: '',
+      selectedVars: [],
+      chartsGenerated: false,
+    };
+  }
+
+  openWizardFromList = () => this.setState({
+    screen: 'wizard', wizardStep: 1, cowNum: '0', calfNum: '0', milkYield: '', field1: '', field2: '', fips: '',
+  });
+
+  onCowNumChange = (e) => this.setState({ cowNum: e.target.value });
+  onCalfNumChange = (e) => this.setState({ calfNum: e.target.value });
+  onMilkYieldChange = (e) => this.setState({ milkYield: e.target.value });
+  onField1Change = (e) => this.setState({ field1: e.target.value });
+  onField2Change = (e) => this.setState({ field2: e.target.value });
+  onFipsChange = (e) => this.setState({ fips: e.target.value });
+
+  decCow = () => this.setState({ cowNum: String(Math.max(0, (parseInt(this.state.cowNum, 10) || 0) - 1)) });
+  incCow = () => this.setState({ cowNum: String((parseInt(this.state.cowNum, 10) || 0) + 1) });
+  decCalf = () => this.setState({ calfNum: String(Math.max(0, (parseInt(this.state.calfNum, 10) || 0) - 1)) });
+  incCalf = () => this.setState({ calfNum: String((parseInt(this.state.calfNum, 10) || 0) + 1) });
+
+  onWizardNext = () => {
+    const s = this.state;
+    if (s.wizardStep === 1) {
+      if ((parseInt(s.cowNum, 10) || 0) <= 0) return;
+      this.setState({ wizardStep: 2 });
+      return;
+    }
+    if (s.wizardStep === 2) {
+      if (!(parseFloat(String(s.milkYield || '').replace(',', '.')) > 0)) return;
+      this.setState({ wizardStep: 3 });
+      return;
+    }
+    if (s.wizardStep === 3) {
+      const f1 = parseFloat(String(s.field1 || '').replace(',', '.'));
+      const f2 = parseFloat(String(s.field2 || '').replace(',', '.'));
+      const fp = parseInt(s.fips, 10) || 0;
+      if (!(f1 > 0) || !(f2 > 0) || !(fp > 0)) return;
+      this.setState({ wizardStep: 4 });
+      return;
+    }
+    if (s.wizardStep === 4) {
+      this.setState({ wizardStep: 5 });
+    }
+  };
+
+  onWizardBack = () => {
+    const st = this.state.wizardStep;
+    if (st > 1 && st <= 4) this.setState({ wizardStep: st - 1 });
+  };
+
+  goToStatusFromConfirm = () => this.setState({ screen: 'status', statusView: 'progress', errorDetailsOpen: false });
+  goToListFromConfirm = () => this.setState({ screen: 'list' });
+
+  openFarm = (farm) => {
+    if (farm.state === 'done') {
+      this.setState({
+        screen: 'results',
+        selectedModules: [], selectedKeywords: [], advancedOpen: false,
+        chartSearch: '', selectedVars: [], chartsGenerated: false,
+      });
+      return;
+    }
+    this.setState({
+      screen: 'status',
+      statusView: farm.state === 'failed' ? 'failed' : 'progress',
+      errorDetailsOpen: false,
+    });
+  };
+
+  selectFarm = (farmId, e) => {
+    if (e && e.stopPropagation) e.stopPropagation();
+    this.setState({ activeFarmId: farmId });
+  };
+
+  backToList = () => this.setState({ screen: 'list' });
+  backToResultsFromChart = () => this.setState({ screen: 'results' });
+
+  toggleErrorDetails = () => this.setState({ errorDetailsOpen: !this.state.errorDetailsOpen });
+
+  toggleModule = (m) => {
+    const set = new Set(this.state.selectedModules);
+    if (set.has(m)) set.delete(m); else set.add(m);
+    this.setState({ selectedModules: Array.from(set) });
+  };
+  toggleKeyword = (k) => {
+    const set = new Set(this.state.selectedKeywords);
+    if (set.has(k)) set.delete(k); else set.add(k);
+    this.setState({ selectedKeywords: Array.from(set) });
+  };
+  toggleAdvanced = () => this.setState({ advancedOpen: !this.state.advancedOpen });
+
+  computeCount = () => 4 + this.state.selectedModules.length * 22 + this.state.selectedKeywords.length * 9;
+
+  openChart = () => {
+    if (this.computeCount() > 0) this.setState({ screen: 'chart' });
+  };
+
+  onChartSearchChange = (e) => this.setState({ chartSearch: e.target.value });
+
+  toggleVar = (key) => {
+    const sel = this.state.selectedVars.slice();
+    const i = sel.indexOf(key);
+    if (i >= 0) {
+      sel.splice(i, 1);
+    } else if (sel.length < 3) {
+      sel.push(key);
+    }
+    this.setState({ selectedVars: sel, chartsGenerated: false });
+  };
+
+  generateCharts = () => {
+    if (this.state.selectedVars.length > 0) this.setState({ chartsGenerated: true });
+  };
+
+  buildPolyline(values, w, h, pad) {
+    const min = Math.min.apply(null, values);
+    const max = Math.max.apply(null, values);
+    const range = (max - min) || 1;
+    const stepX = (w - pad * 2) / (values.length - 1);
+    return values.map((v, i) => {
+      const x = pad + i * stepX;
+      const y = pad + (h - pad * 2) * (1 - (v - min) / range);
+      return x.toFixed(1) + ',' + y.toFixed(1);
+    }).join(' ');
+  }
+
+  renderVals() {
+    const s = this.state;
+
+    const isList = s.screen === 'list';
+    const isWizard = s.screen === 'wizard';
+    const isStatus = s.screen === 'status';
+    const isResults = s.screen === 'results';
+    const isChart = s.screen === 'chart';
+
+    let contentBackVisible = !isList;
+    let contentBackLabel = 'Voltar para fazendas';
+    let contentBackAction = this.backToList;
+    if (isChart) { contentBackLabel = 'Voltar para resultados'; contentBackAction = this.backToResultsFromChart; }
+    if (isWizard) { contentBackLabel = 'Cancelar cadastro'; contentBackAction = this.backToList; }
+
+    const farmItems = FARMS.map((f) => {
+      const isActive = f.id === s.activeFarmId;
+      const canView = f.state === 'done';
+      return {
+        id: f.id,
+        label: f.cow + ' vacas · ' + f.calf + ' bezerras',
+        meta: f.sim + ' · ' + f.date,
+        chipBg: STATE_BG[f.state], chipFg: STATE_FG[f.state], chipLabel: STATE_LABEL[f.state],
+        isActive,
+        cardBorder: isActive ? '2px solid #1B4D3E' : '1px solid rgba(27,77,62,0.14)',
+        selectLabel: isActive ? 'Selecionada' : 'Selecionar',
+        selectBg: isActive ? '#EFE6D6' : '#1B4D3E',
+        selectFg: isActive ? '#8A7B5C' : '#FAF7F0',
+        resultsBorder: canView ? '#1B4D3E' : 'rgba(27,77,62,0.25)',
+        resultsColor: canView ? '#1B4D3E' : 'rgba(27,77,62,0.35)',
+        onOpen: () => this.openFarm(f),
+        onSelect: (e) => this.selectFarm(f.id, e),
+        onViewResultsClick: canView ? (e) => { if (e && e.stopPropagation) e.stopPropagation(); this.openFarm(f); } : (e) => { if (e && e.stopPropagation) e.stopPropagation(); },
+      };
+    });
+
+    const activeFarm = FARMS.find((f) => f.id === s.activeFarmId) || FARMS[0];
+    const drawerFarmItems = FARMS.map((f) => ({
+      label: f.cow + ' vacas · ' + f.calf + ' bezerras',
+      isActive: f.id === s.activeFarmId,
+      rowBg: f.id === s.activeFarmId ? '#EFE6D6' : 'transparent',
+      onSelect: () => { this.setState({ activeFarmId: f.id }); },
+    }));
+
+    const wizardStepNames = ['Rebanho', 'Produção', 'Propriedade'];
+    const wizardStepLabel = s.wizardStep <= 3 ? ('Etapa ' + s.wizardStep + ' de 3') : (s.wizardStep === 4 ? 'Quase lá' : 'Concluído');
+    const wizardStepName = s.wizardStep <= 3 ? wizardStepNames[s.wizardStep - 1] : (s.wizardStep === 4 ? 'Revisão' : 'Pronto');
+    const barColor = (seg) => {
+      const filled = s.wizardStep > seg || s.wizardStep >= 4;
+      const current = s.wizardStep === seg;
+      if (filled) return '#F4C15C';
+      if (current) return '#1B4D3E';
+      return 'rgba(27,77,62,0.15)';
+    };
+
+    const reviewGroups = [
+      { title: 'Rebanho', onEdit: () => this.setState({ wizardStep: 1 }), items: [
+        { label: 'Vacas em lactação', value: (parseInt(s.cowNum, 10) || 0) + ' vacas' },
+        { label: 'Bezerras', value: String(parseInt(s.calfNum, 10) || 0) },
+      ]},
+      { title: 'Produção', onEdit: () => this.setState({ wizardStep: 2 }), items: [
+        { label: 'Meta de produção anual', value: (s.milkYield || '0') + ' kg/ano' },
+      ]},
+      { title: 'Propriedade', onEdit: () => this.setState({ wizardStep: 3 }), items: [
+        { label: 'Tamanho do campo 1', value: (s.field1 || '0') + ' acres' },
+        { label: 'Tamanho do campo 2', value: (s.field2 || '0') + ' acres' },
+        { label: 'Código do condado (FIPS)', value: s.fips || '0' },
+      ]},
+    ];
+
+    const wizardNextLabel = s.wizardStep === 3 ? 'Revisar respostas' : (s.wizardStep === 4 ? 'Enviar cadastro' : 'Próximo');
+
+    const moduleChips = MODULES.map((m) => {
+      const selected = s.selectedModules.indexOf(m) >= 0;
+      return {
+        name: m, selected,
+        bg: selected ? '#1B4D3E' : '#FFFFFF',
+        fg: selected ? '#FAF7F0' : '#26332C',
+        border: selected ? '#1B4D3E' : 'rgba(27,77,62,0.2)',
+        onToggle: () => this.toggleModule(m),
+      };
+    });
+    const keywordChips = KEYWORDS.map((k) => {
+      const selected = s.selectedKeywords.indexOf(k) >= 0;
+      return {
+        name: k, selected,
+        bg: selected ? '#4FB6A8' : '#FFFFFF',
+        fg: selected ? '#0E2C25' : '#26332C',
+        border: selected ? '#4FB6A8' : 'rgba(27,77,62,0.2)',
+        onToggle: () => this.toggleKeyword(k),
+      };
+    });
+    const selectedCount = this.computeCount();
+    const patternParts = s.selectedModules.concat(s.selectedKeywords);
+    const regexPreview = patternParts.length ? ('.*(' + patternParts.join('|') + ').*') : '.*';
+
+    const filteredCandidates = CANDIDATE_VARS.filter((v) => v.full.toLowerCase().indexOf(s.chartSearch.toLowerCase()) >= 0);
+    const chartCandidateItems = filteredCandidates.map((v) => {
+      const selected = s.selectedVars.indexOf(v.key) >= 0;
+      const disabled = !selected && s.selectedVars.length >= 3;
+      return {
+        key: v.key,
+        full: v.full,
+        short: v.full.split('.').pop(),
+        selected,
+        opacity: disabled ? '0.4' : '1',
+        boxBorder: selected ? '#1B4D3E' : 'rgba(27,77,62,0.3)',
+        boxBg: selected ? '#1B4D3E' : 'transparent',
+        onToggle: disabled ? () => {} : () => this.toggleVar(v.key),
+      };
+    });
+    const chartCards = s.chartsGenerated ? s.selectedVars.map((key) => {
+      const item = CANDIDATE_VARS.find((v) => v.key === key);
+      const series = SAMPLE_SERIES[key];
+      return {
+        key,
+        short: item.full.split('.').pop(),
+        full: item.full,
+        points: this.buildPolyline(series, 260, 120, 12),
+        minLabel: String(Math.min.apply(null, series)),
+        maxLabel: String(Math.max.apply(null, series)),
+      };
+    }) : [];
+
+    return {
+      isList, isWizard, isStatus, isResults, isChart,
+      contentBackVisible, contentBackLabel, contentBackAction,
+      backToList: this.backToList,
+
+      farmItems,
+      openWizardFromList: this.openWizardFromList,
+
+      wizardShowProgress: s.wizardStep <= 3,
+      wizardStepLabel, wizardStepName,
+      wizardBar1: barColor(1), wizardBar2: barColor(2), wizardBar3: barColor(3),
+      wizardStepIs1: s.wizardStep === 1,
+      wizardStepIs2: s.wizardStep === 2,
+      wizardStepIs3: s.wizardStep === 3,
+      wizardStepIs4: s.wizardStep === 4,
+      wizardStepIs5: s.wizardStep === 5,
+      cowNum: s.cowNum, calfNum: s.calfNum, milkYield: s.milkYield, field1: s.field1, field2: s.field2, fips: s.fips,
+      onCowNumChange: this.onCowNumChange, onCalfNumChange: this.onCalfNumChange,
+      onMilkYieldChange: this.onMilkYieldChange, onField1Change: this.onField1Change,
+      onField2Change: this.onField2Change, onFipsChange: this.onFipsChange,
+      decCow: this.decCow, incCow: this.incCow, decCalf: this.decCalf, incCalf: this.incCalf,
+      reviewGroups,
+      goToStatusFromConfirm: this.goToStatusFromConfirm,
+      goToListFromConfirm: this.goToListFromConfirm,
+
+      showWizardFooter: s.wizardStep <= 4,
+      wizardShowBack: s.wizardStep > 1,
+      wizardNextBg: '#1B4D3E',
+      wizardNextLabel,
+      onWizardNext: this.onWizardNext,
+      onWizardBack: this.onWizardBack,
+
+      statusIsProgress: s.statusView === 'progress',
+      statusIsFailed: s.statusView === 'failed',
+      errorDetailsOpen: s.errorDetailsOpen,
+      errorDetailsToggleLabel: s.errorDetailsOpen ? 'ocultar' : 'ver',
+      toggleErrorDetails: this.toggleErrorDetails,
+      sampleErrorText: SAMPLE_ERROR,
+
+      moduleChips, keywordChips,
+      advancedOpen: s.advancedOpen,
+      advancedToggleLabel: s.advancedOpen ? 'ocultar' : 'ver',
+      toggleAdvanced: this.toggleAdvanced,
+      regexPreview,
+      selectedCount,
+      resultsCtaBg: selectedCount > 0 ? '#1B4D3E' : 'rgba(27,77,62,0.3)',
+      openChart: this.openChart,
+
+      chartSearch: s.chartSearch, onChartSearchChange: this.onChartSearchChange,
+      chartCandidateItems,
+      selectedVarsCount: s.selectedVars.length,
+      generateLabel: s.chartsGenerated ? 'Atualizar gráfico' : 'Gerar gráfico',
+      generateBg: s.selectedVars.length > 0 ? '#1B4D3E' : 'rgba(27,77,62,0.3)',
+      generateFg: '#FAF7F0',
+      generateCharts: this.generateCharts,
+      chartsGenerated: s.chartsGenerated,
+      chartEmptyVisible: !s.chartsGenerated,
+      chartCards,
+
+      activeFarmLabel: activeFarm.cow + ' vacas · ' + activeFarm.calf + ' bezerras',
+      activeFarmState: STATE_LABEL[activeFarm.state],
+      drawerFarmItems,
+    };
+  }
+}
+</script>
+</body>
+</html>

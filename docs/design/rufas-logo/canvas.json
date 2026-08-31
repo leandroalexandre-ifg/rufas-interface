@@ -1,0 +1,8 @@
+{
+  "artboards": [
+    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 760, "h": 380, "title": "Logo principal" },
+    { "file": "IconMark.dc.html", "x": 860, "y": 0, "w": 420, "h": 420, "title": "Ícone / app icon" },
+    { "file": "Wordmark.dc.html", "x": 1380, "y": 0, "w": 760, "h": 220, "title": "Wordmark" }
+  ],
+  "launch": { "view": "canvas" }
+}
