@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
 import '../core/api_client.dart';
@@ -113,6 +114,39 @@ class _FarmListScreenState extends State<FarmListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final refreshableBody = RefreshIndicator(
+      onRefresh: _refresh,
+      child: kIsWeb
+          ? Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 760),
+                child: _buildBody(context),
+              ),
+            )
+          : _buildBody(context),
+    );
+
+    // Web/navegador: menu lateral sempre visível (painel fixo) em vez de
+    // gaveta escondida atrás de um hambúrguer — não faz sentido se
+    // comportar como app de celular numa tela grande. No mobile (Android)
+    // continua como gaveta. Decisão do usuário, 2026-09-01.
+    if (kIsWeb) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Fazendas')),
+        body: Row(
+          children: [
+            AppDrawer(
+              asSidebar: true,
+              simulations: _simulations,
+              activeId: _activeId,
+              onSelectActive: _setActive,
+            ),
+            Expanded(child: refreshableBody),
+          ],
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(title: const Text('Fazendas')),
       drawer: AppDrawer(
@@ -120,10 +154,7 @@ class _FarmListScreenState extends State<FarmListScreen> {
         activeId: _activeId,
         onSelectActive: _setActive,
       ),
-      body: RefreshIndicator(
-        onRefresh: _refresh,
-        child: _buildBody(context),
-      ),
+      body: refreshableBody,
     );
   }
 

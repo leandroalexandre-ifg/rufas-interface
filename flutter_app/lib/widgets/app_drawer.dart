@@ -16,11 +16,17 @@ class AppDrawer extends StatefulWidget {
   final String? activeId;
   final ValueChanged<String> onSelectActive;
 
+  /// Quando true, renderiza como painel fixo (web/navegador) em vez de
+  /// gaveta deslizante (mobile) — ver farm_list_screen.dart, que decide
+  /// qual modo usar por `kIsWeb`. Mesmo conteúdo nos dois casos.
+  final bool asSidebar;
+
   const AppDrawer({
     super.key,
     required this.simulations,
     required this.activeId,
     required this.onSelectActive,
+    this.asSidebar = false,
   });
 
   @override
@@ -46,8 +52,7 @@ class _AppDrawerState extends State<AppDrawer> {
     final active = _active;
     final textTheme = Theme.of(context).textTheme;
 
-    return Drawer(
-      child: SafeArea(
+    final content = SafeArea(
         child: Column(
           children: [
             Padding(
@@ -166,7 +171,7 @@ class _AppDrawerState extends State<AppDrawer> {
                     selected: true,
                     selectedTileColor: AppColors.lightGreen.withValues(alpha: 0.35),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                    onTap: () => Navigator.of(context).maybePop(),
+                    onTap: widget.asSidebar ? () {} : () => Navigator.of(context).maybePop(),
                   ),
                 ],
               ),
@@ -190,8 +195,24 @@ class _AppDrawerState extends State<AppDrawer> {
             ),
           ],
         ),
-      ),
-    );
+      );
+
+    if (widget.asSidebar) {
+      // Material próprio (não só Container com cor) para o ListTile
+      // selecionado pintar corretamente — sem isso o framework avisa que
+      // o DecoratedBox com cor de fundo esconde o ink/seleção do ListTile.
+      return Container(
+        width: 300,
+        decoration: BoxDecoration(
+          border: Border(right: BorderSide(color: Theme.of(context).colorScheme.outlineVariant)),
+        ),
+        child: Material(
+          color: Theme.of(context).colorScheme.surface,
+          child: content,
+        ),
+      );
+    }
+    return Drawer(child: content);
   }
 
   Widget _sectionLabel(BuildContext context, String text) {
