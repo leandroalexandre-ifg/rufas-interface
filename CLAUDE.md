@@ -456,6 +456,22 @@ exigiria setar mais 5 campos por task sem ganho de correção.
 - **Gap do curral (`pen_information`) continua ignorado.** Fazendas com
   `cow_num`/`calf_num` grandes podem gerar superlotação (ver achado da
   PoC acima) — não tratado nesta fase.
+- **Separador de esterco não escala com o rebanho — trava a simulação
+  inteira (achado em 2026-08-31).** Diferente do gap do curral (que só
+  gera aviso), este **crasha** a simulação principal sem produzir CSV:
+  `ValueError: Separator 'screw_press_1' attempted to separate more
+  water into manure solids fraction than was present in manure entering
+  separator.` O parâmetro problemático (`separated_solids_dry_matter:
+  0.35` em `RuFaS/input/data/manure/example_freestall_processor_configs.json`)
+  vem fixo do cenário `freestall` original (calibrado pra ~100 vacas) e
+  não é substituído por `farm_translation.py`. Reproduzido 2x (150 e
+  1000 vacas — ambas travaram; 60/100/120 vacas, faixa do cenário
+  original, sempre completaram normalmente). Causa dentro do próprio
+  RuFaS (`RUFAS/biophysical/manure/separator/separator.py`), não na
+  tradução — decisão do usuário: **só documentar por agora**, sem
+  investigar o fix (mexeria no código do modelo, não só na tradução).
+  **Orientação prática até resolver:** manter `cow_num` próximo da faixa
+  já validada (até ~120) para evitar a falha.
 - **Sem Docker, sem autenticação.** Tudo local, um único usuário
   confiável (o desenvolvedor). CORS liberado (`allow_origins=["*"]`) para
   o Flutter (web + desktop/mobile) local conseguir chamar a API sem

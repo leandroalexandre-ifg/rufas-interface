@@ -109,6 +109,7 @@ Detalhes de cada um em [`docs/FEATURES.md`](docs/FEATURES.md).
 
 - **Uma simulação por vez** (fila serializada) — concorrência real não implementada.
 - **Gap do curral:** a capacidade dos currais não escala automaticamente com o número de animais; rebanhos grandes podem superlotar.
+- **Separador de esterco trava a simulação em rebanhos grandes:** um parâmetro fixo do cenário original (`separated_solids_dry_matter`) não escala com `cow_num` — simulações acima de ~120 vacas falham sem gerar CSV (`ValueError` no separador `screw_press_1`). Faixa validada: até ~120 vacas.
 - **Sem limpeza automática:** cada simulação gera ~1 GB; a limpeza de execuções antigas é manual (prioridade para robustez futura).
 - **`annual_milk_yield` é alvo, não garantia:** a produção informada calibra a curva de lactação; o valor realizado depende da dinâmica completa da simulação.
 - **macOS/iOS não validados:** requer instalação completa do Xcode.
