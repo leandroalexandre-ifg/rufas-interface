@@ -2,7 +2,7 @@
 
 Interface amigável que conecta produtores rurais ao modelo de simulação de fazenda leiteira **RuFaS** (Ruminant Farm Systems), escondendo a complexidade técnica do modelo por trás de um formulário em linguagem de fazenda, um backend que executa a simulação, e um aplicativo que explora os resultados.
 
-> **Estado atual:** app funcional de ponta a ponta (cadastro → simulação → filtragem → visualização), em web e Android, com identidade visual Material 3. Roda localmente. Ver [Roadmap](#roadmap) para o que falta.
+> **Estado atual:** app funcional de ponta a ponta (cadastro em wizard → simulação → filtragem → visualização), em web e Android, com menu lateral e identidade visual própria (paleta editorial de laticínio, tipografia Work Sans). Roda localmente. Ver [Roadmap](#roadmap) para o que falta.
 
 ---
 
@@ -48,7 +48,7 @@ Detalhes em [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
 ```
 projetoRuFaS/
-├── RuFaS/               # o modelo (código-fonte + input/ + output/)
+├── RuFaS/               # o modelo — git submodule (github.com/RuminantFarmSystems/RuFaS)
 ├── backend/             # API FastAPI (tradução, execução, filtragem)
 ├── flutter_app/         # aplicativo Flutter (frontend)
 ├── dashboard/           # dashboard Streamlit original (marco anterior)
@@ -64,17 +64,19 @@ projetoRuFaS/
 
 ## Como rodar (desenvolvimento local)
 
-> **Pré-requisitos:** Python 3.x com o venv do RuFaS, Flutter 3.44+, e o RuFaS já funcional na máquina.
+> **Pré-requisitos:** Python 3.x com o venv do RuFaS, Flutter 3.44+, e o RuFaS já funcional na máquina. Como `RuFaS/` é um git submodule, um clone novo precisa de `git submodule update --init` (ou clonar com `--recurse-submodules`) antes de tudo.
 
 ### Backend
 
-O backend importa a si mesmo como pacote (`from backend import ...`), então precisa rodar **a partir da raiz do projeto**, com a raiz no `PYTHONPATH`. **E precisa também de `RuFaS/` no `PYTHONPATH`** — sem isso, `import RUFAS` (usado por `simulation_runner.py`) resolve para uma cópia antiga instalada em `RuFaS/venv/.../site-packages/RUFAS` (sem o submódulo `biophysical`) em vez do código-fonte real em `RuFaS/RUFAS/`, e qualquer simulação falha com `ModuleNotFoundError: No module named 'RUFAS.biophysical'`:
+O backend importa a si mesmo como pacote (`from backend import ...`), então precisa rodar **a partir da raiz do projeto**, com a raiz no `PYTHONPATH`:
 
 ```bash
 source RuFaS/venv/bin/activate       # o venv do RuFaS, onde fastapi/uvicorn foram instalados
-PYTHONPATH=.:RuFaS uvicorn backend.app:app --reload --port 8000
+PYTHONPATH=. uvicorn backend.app:app --reload --port 8000
 ```
 A API sobe em `http://localhost:8000`. Documentação interativa automática em `http://localhost:8000/docs` (Swagger, gerado pelo FastAPI).
+
+> **Nota técnica:** o venv do RuFaS tem um `pip install` não-editável incompleto (falta o subpacote `RUFAS.biophysical`, por uma limitação do `pyproject.toml` do RuFaS). `backend/simulation_runner.py` já contorna isso sozinho, inserindo o código-fonte real (`RuFaS/RUFAS/`) na frente no `sys.path` antes de importar — não é mais preciso incluir `RuFaS` manualmente no `PYTHONPATH` do comando acima.
 
 ### Frontend (Flutter)
 

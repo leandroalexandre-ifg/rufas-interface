@@ -16,7 +16,7 @@ Permitir que produtores rurais e técnicos (extensionistas, zootecnistas) — se
 
 ## Requisitos funcionais
 
-Numerados como RF-n. Estado: ✅ implementado · ⬜ a construir.
+Numerados como RF-n. Estado: ✅ implementado · 🟡 parcial · ⬜ a construir.
 
 ### Cadastro e simulação de fazenda
 
@@ -51,8 +51,8 @@ Numerados como RF-n. Estado: ✅ implementado · ⬜ a construir.
 
 ### Múltiplas fazendas (previsto no design)
 
-- **RF-17** ⬜ O sistema deve permitir gerenciar várias fazendas por usuário, com seleção de uma fazenda ativa à qual o assistente e os resultados se referem.
-> Nota: a rota de listagem (RF-08) é a base para isto; o gerenciamento completo de múltiplas fazendas com fazenda ativa é do design do app, ainda a implementar plenamente.
+- **RF-17** 🟡 O sistema deve permitir gerenciar várias fazendas por usuário, com seleção de uma fazenda ativa à qual o assistente e os resultados se referem.
+> Nota (atualizado 2026-08-31): a seleção de "fazenda ativa" já existe na Tela 1 e no menu lateral (`app_drawer.dart`) — mas é um estado só de UI, não persiste entre reinícios e não existe conceito equivalente no backend. Fica parcial porque a metade que falta (o assistente referenciar a fazenda ativa) depende da Fase 4, ainda não construída.
 
 ---
 
@@ -65,7 +65,7 @@ Numerados como RF-n. Estado: ✅ implementado · ⬜ a construir.
 - **RNF-05 — Legibilidade dos dados:** volumes grandes (CSV de ~900 MB) não podem ser enviados crus ao cliente; o backend filtra e reduz (downsampling) antes.
 - **RNF-06 — Manutenibilidade:** tema visual e validações centralizados em fonte única; lógica de filtragem compartilhada de forma coerente.
 - **RNF-07 — Reprodutibilidade:** a execução do RuFaS registra a semente e a configuração, permitindo regenerar resultados.
-- **RNF-08 — Identidade visual:** Material 3 com paleta associada à pecuária leiteira (verdes, âmbar), transmitindo confiança.
+- **RNF-08 — Identidade visual:** paleta associada à pecuária leiteira (verde-floresta, dourado, creme — ver `docs/design/README.md`), sobre Material 3, transmitindo confiança.
 
 ---
 
@@ -99,10 +99,11 @@ Numerados como RF-n. Estado: ✅ implementado · ⬜ a construir.
 
 | Requisito | Camada / componente principal |
 |-----------|-------------------------------|
-| RF-01, RF-02 | Frontend — `new_farm_screen.dart`, `form_validators.dart` |
+| RF-01, RF-02 | Frontend — `new_farm_wizard_screen.dart`, `form_validators.dart` |
 | RF-03 | Backend — `farm_translation.py` |
 | RF-04, RF-05 | Backend — `simulation_runner.py`, `app.py` (background) |
 | RF-06, RF-07 | Frontend — `simulation_status_screen.dart`, `simulation_states.dart` |
 | RF-08 | Backend — `GET /simulations` · Frontend — `farm_list_screen.dart` |
 | RF-09..RF-13 | Backend — endpoints de colunas/filtro/chart-data · Frontend — `results_screen.dart`, `chart_screen.dart` |
 | RF-14 | Frontend — `api_client.dart` (resolução por plataforma) |
+| RF-17 (parcial) | Frontend — `farm_list_screen.dart`, `app_drawer.dart` (estado só de UI, sem equivalente no backend) |

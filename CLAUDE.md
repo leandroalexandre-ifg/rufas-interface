@@ -628,6 +628,48 @@ já existente em disco (backend seedado com jobs falsos só para a
 validação visual, descartado ao final — não faz parte do código do
 projeto).
 
+**Nota (2026-08-31): esta paleta foi substituída** — ver "Nova
+identidade visual" mais abaixo. Seção mantida por contexto histórico.
+
+## Reformula navegação: menu lateral + cadastro em wizard (2026-08-29)
+Adaptação de um design de referência ("Cadastro Fazenda Wizard", Claude
+Design): a Tela 1 virou shell + lista, com `widgets/app_drawer.dart`
+(novo) — navegação lateral com marca, seletor de "fazenda ativa" (estado
+só de UI, não existe no backend) e item "Minhas Fazendas" com contador.
+A Tela 2 (`new_farm_screen.dart`, removido) virou
+`screens/new_farm_wizard_screen.dart` (novo): wizard de 3 etapas
+(Rebanho, Produção, Propriedade) + Revisão + Confirmação, usando só os 6
+campos que `backend/app.py` aceita — campos do design sem equivalente no
+backend (nome da fazenda, vacas secas, raça, busca de município por
+nome) ficaram de fora, por decisão do usuário. Nenhum arquivo do
+`backend/` foi alterado; `simulation_status_screen.dart`,
+`results_screen.dart` e `chart_screen.dart` continuam intocados.
+Testado de ponta a ponta (Web e Android, release) com uma simulação real
+disparada no backend.
+
+## Nova identidade visual "editorial de laticínio" (2026-08-31)
+Reskin completo do `app_theme.dart`, substituindo a paleta Material 3
+descrita acima — só camada visual, mesma regra de antes (nenhuma
+lógica/funcionalidade alterada). Decisão tomada explorando referências
+de estilo com o usuário via Claude Design — detalhes e os arquivos de
+design (`.dc.html`) em `docs/design/README.md`.
+
+Paleta nova: verde-floresta `#1B4D3E` primária (era `#2E7D32`),
+verde-claro `#DCEAE1` de apoio (era `#A5D6A7`), dourado `#F4C15C` de
+acento (era âmbar `#F9A825`), fundo creme `#FAF7F0` (era `#FAF9F4`),
+texto `#26332C`. Tipografia trocada de padrão do sistema para **Work
+Sans** via pacote `google_fonts` (nova dependência), peso alto (900) nos
+títulos. Botões/chips/FAB viraram formato pílula (`StadiumBorder`); cards
+perderam a sombra, ganharam borda fina no lugar.
+
+`core/simulation_states.dart` foi corrigido nessa mudança: as cores de
+estado tinham hex duplicado localmente (não referenciavam `AppColors`),
+então continuariam com a paleta antiga mesmo depois do reskin do tema —
+passaram a referenciar `AppColors.primaryGreen`/`AppColors.amber`.
+
+Validado rodando o app de verdade no navegador (lista, menu lateral,
+wizard de cadastro) com o backend real já rodando.
+
 ## Estado do marco (2026-08-29): Fases 1, 2 e 3 concluídas + identidade visual aplicada
 Backend (API FastAPI sobre a PoC + filtragem, ver seções acima) e app
 Flutter (4 telas, Web e Android) funcionando **de ponta a ponta,
@@ -648,3 +690,35 @@ visual, pronto para demonstração (Web e Android).**
 **Próximo passo natural**: avançar para a Fase 4 do plano original
 (assistente conversacional, ver "Arquitetura escolhida" no topo desta
 seção).
+
+## Estado do marco (2026-08-31): navegação em wizard, identidade nova, RuFaS como submodule
+Atualização do estado acima (2026-08-29), que ficou desatualizado em
+três pontos:
+
+1. **Navegação**: Tela 1 tem menu lateral (`app_drawer.dart`) com
+   "fazenda ativa"; Tela 2 é o wizard de 3 passos + revisão +
+   confirmação, não mais um formulário único — ver "Reformula
+   navegação" acima.
+2. **Identidade visual**: paleta "editorial de laticínio" (verde-floresta
+   + dourado + creme, Work Sans), não mais a paleta Material 3 original —
+   ver "Nova identidade visual" acima.
+3. **Bug corrigido no backend**: o venv do RuFaS tinha (tem) um
+   `pip install` não-editável incompleto — falta o subpacote
+   `RUFAS.biophysical` (limitação do `pyproject.toml` do RuFaS,
+   `packages = ["RUFAS"]` sem subpacotes). Isso já causava
+   `ModuleNotFoundError: No module named 'RUFAS.biophysical'`
+   dependendo de como o `uvicorn` era iniciado (o truque de
+   `os.chdir` + `PYTHONPATH` em `simulation_runner.py` só funcionava se
+   o processo deixasse `sys.path` seguir o `cwd` dinamicamente — não é o
+   caso ao rodar o script `uvicorn` do venv diretamente). Corrigido
+   inserindo `RUFAS_ROOT` explicitamente no início do `sys.path` em
+   `backend/simulation_runner.py`, independente de como o processo é
+   iniciado.
+4. **`RuFaS/` agora é git submodule** deste repositório (era só um
+   checkout local ignorado pelo git) — ver "RuFaS agora é git submodule
+   deste repositório" acima.
+
+Nenhuma dessas mudanças alterou o fluxo funcional (cadastro → simulação
+→ status → resultados → gráfico), que continua de ponta a ponta em Web e
+Android. **Próximo passo natural continua sendo a Fase 4** (assistente
+conversacional).

@@ -13,8 +13,8 @@ O sistema tem três camadas, separadas por responsabilidade e conectadas por uma
 │   App Flutter       │ ◄────────────────► │   Backend Python         │
 │   (frontend)        │      JSON          │   (FastAPI)              │
 │                     │                    │                          │
-│ - Lista de fazendas │                    │ - Tradução               │
-│ - Formulário        │                    │ - Execução do RuFaS      │
+│ - Lista + menu      │                    │ - Tradução               │
+│ - Cadastro (wizard) │                    │ - Execução do RuFaS      │
 │ - Status            │                    │ - Filtragem de resultado │
 │ - Resultados/gráfico│                    │                          │
 │ web · Android       │                    └───────────┬──────────────┘
@@ -42,19 +42,20 @@ flutter_app/lib/
 ├── main.dart               # entrada; aplica o tema
 ├── core/
 │   ├── api_client.dart     # wrapper HTTP; resolve base URL por plataforma
-│   ├── app_theme.dart      # tema Material 3 (fonte única de cores/estilos)
-│   ├── form_validators.dart# validação dos campos do formulário
-│   └── simulation_states.dart # tradução dos estados técnicos → linguagem de fazenda
+│   ├── app_theme.dart      # tema (Material 3 + Work Sans/google_fonts) — fonte única de cores/estilos
+│   ├── form_validators.dart# validação dos campos do wizard de cadastro
+│   └── simulation_states.dart # tradução dos estados técnicos → linguagem de fazenda + cores (via AppColors)
 ├── models/                 # farm_input, simulation_summary
-├── screens/                # as 4 telas do fluxo (results_screen.dart + chart_screen.dart formam a Tela 4, em duas partes)
-└── widgets/                # componentes reutilizáveis (hoje: chip de estado — o card de gráfico é uma classe privada dentro de chart_screen.dart, não um widget à parte)
+├── screens/                # as 4 telas do fluxo — Tela 2 é um wizard de 3 passos + revisão + confirmação (new_farm_wizard_screen.dart); results_screen.dart + chart_screen.dart formam a Tela 4, em duas partes
+└── widgets/                # app_drawer.dart (menu lateral, fazenda ativa) e simulation_state_chip.dart — o card de gráfico é uma classe privada dentro de chart_screen.dart, não um widget à parte
 ```
 
 ### Decisões de frontend
 - **Sem gerenciador de estado externo** (Provider/Riverpod/Bloc) nesta fase: com 4 telas e fluxo linear, `StatefulWidget` + `setState` + `Navigator` do Flutter bastam. Menos conceitos novos enquanto a equipe aprende Flutter. Reavaliar se a Fase 4 (chat) crescer a complexidade.
 - **`http` em vez de `dio`:** o pacote oficial cobre as necessidades atuais; recursos avançados (interceptors, retry) não são necessários ainda.
 - **`fl_chart` para gráficos:** puro Dart, sem dependência nativa — funciona igual nas três plataformas.
-- **Material 3 via seed color:** o tema deriva toda a paleta de uma cor-semente (verde `#2E7D32`), gerando variações harmônicas automaticamente. Centralizado em `app_theme.dart`.
+- **Identidade visual própria, não Material 3 padrão:** paleta "editorial de laticínio" (verde-floresta `#1B4D3E`, dourado, creme — ver `docs/design/README.md`) sobre `ColorScheme`/`useMaterial3: true`, com tipografia Work Sans via `google_fonts`. Centralizado em `app_theme.dart`; nenhuma tela hardcoda cor localmente.
+- **Cadastro em wizard, não formulário único:** 3 passos (Rebanho, Produção, Propriedade) + revisão + confirmação, com menu lateral (`app_drawer.dart`) e conceito de "fazenda ativa" (só de UI) na lista — adaptação de um design de referência (decisão de 2026-08-29).
 
 ### Resolução de rede por plataforma
 Ponto de atenção específico do Flutter, centralizado em `api_client.dart`:
@@ -112,7 +113,7 @@ Liberado para permitir que o app Flutter Web (que roda no navegador) chame a API
 
 ## Camada 3 — O modelo (RuFaS)
 
-O RuFaS é acionado pelo backend, não modificado. Pontos relevantes para a arquitetura:
+O RuFaS é acionado pelo backend, não modificado. É um **git submodule** deste repositório (decidido em 2026-08-31), apontando pro projeto oficial (`github.com/RuminantFarmSystems/RuFaS`) — quem clona precisa de `git submodule update --init` (ou `git clone --recurse-submodules`). Pontos relevantes para a arquitetura:
 
 - **Entrada:** árvore de arquivos JSON/CSV encadeados por caminho (nunca conteúdo embutido) — o que viabiliza a estratégia de substituição.
 - **Saída:** CSV de ~3.322 colunas, resolução diária, até ~900 MB. **Nota importante:** as ~256 mil linhas NÃO são dias — a simulação cobre ~2.556 dias (7 anos); o arquivo é largo porque concatena ~50 tabelas de reporters lado a lado, com contagens de linha diferentes. Isso afeta como os dados são lidos e agregados.

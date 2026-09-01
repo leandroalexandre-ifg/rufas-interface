@@ -4,31 +4,50 @@ Descrição detalhada de cada funcionalidade: o que faz, como funciona por dentr
 
 ---
 
-## 1. Cadastro de fazenda
+## 1. Lista de fazendas e navegação (Tela 1)
 
-**O que o usuário vê:** um formulário em três seções (Rebanho, Produção, Propriedade) com poucos campos em linguagem de fazenda.
+**O que o usuário vê:** a lista de fazendas cadastradas (`GET /simulations`), um cartão por fazenda com estado (chip colorido), botão "Cadastrar nova fazenda", e um menu lateral (`AppDrawer`, ícone de hambúrguer na AppBar).
 
-**Campos** (os que a prova de conceito validou como suficientes):
+**Fazenda ativa:** conceito só de UI (não existe endpoint nem campo correspondente no backend) — o usuário pode marcar uma fazenda como "ativa" na lista ou no menu lateral; a seleção não persiste entre reinícios do app. Como não há campo "nome" de fazenda, o resumo usado como identificador é sempre "N vacas · M bezerras".
 
-| Campo | Alimenta no RuFaS | Observação |
-|-------|-------------------|------------|
-| Vacas em lactação | `cow_num` | inteiro > 0 |
-| Bezerras | `calf_num` | inteiro ≥ 0 |
-| Produção de leite típica | `annual_milk_yield` | float > 0 — **alvo de calibração, não garantia** |
-| Tamanho da propriedade | `field_size_1`, `field_size_2` (2 campos) | float > 0 cada |
-| Município / localização | `fips_county_code` | inteiro > 0 — ver gap do clima |
+**Ações do cartão:**
+- **Selecionar** — marca a fazenda como ativa (não navega).
+- **Ver resultados** — habilitado só quando `state == "done"`.
+- Tocar no cartão (fora dos botões) navega: para a Tela 4 (Resultados) se `done`, senão para a Tela 3 (Status).
 
-São exatamente estes 6 campos (`FarmInputRequest` em `backend/app.py`) — não há campo de raça nem de vacas secas nesta fase.
+**Menu lateral (`AppDrawer`):** mostra a fazenda ativa, permite trocá-la, e tem o atalho "Minhas Fazendas" com contador. Adaptação para celular (gaveta) de um design de referência que usava uma barra lateral fixa — ver `docs/design/README.md`.
 
-**Validação** (`form_validators.dart`): obrigatoriedade, tipo (inteiro/decimal, aceitando vírgula ou ponto), e faixa. Mensagens em português claro, centralizadas.
-
-**Por dentro:** ao enviar, o app faz `POST /simulations` com os campos; o backend responde na hora com um `simulation_id` e dispara a simulação em background. O app retorna à lista, onde a nova fazenda aparece com estado "na fila".
-
-> **Gap do clima:** hoje não há gerador de clima a partir da localização — o RuFaS usa um arquivo de clima selecionado. Traduzir "município" → arquivo de clima é trabalho de backend ainda pendente. O campo existe na interface; a tradução completa virá depois.
+**Arquivos:** `flutter_app/lib/screens/farm_list_screen.dart`, `flutter_app/lib/widgets/app_drawer.dart`.
 
 ---
 
-## 2. Tradução (backend, Etapa 2)
+## 2. Cadastro de fazenda (wizard)
+
+**O que o usuário vê:** um assistente (wizard) de 3 etapas — **Rebanho**, **Produção**, **Propriedade** — seguidas de uma etapa de **Revisão** (com atalho "Alterar" de volta a cada etapa) e uma de **Confirmação**. Cada etapa só avança se os campos dela forem válidos; uma barra de progresso no topo mostra a etapa atual. Substituiu o formulário de página única original (decisão de 2026-08-29).
+
+**Campos** (os que a prova de conceito validou como suficientes), por etapa:
+
+| Etapa | Campo | Alimenta no RuFaS | Observação |
+|-------|-------|-------------------|------------|
+| Rebanho | Vacas em lactação | `cow_num` | inteiro > 0, com stepper +/- |
+| Rebanho | Bezerras | `calf_num` | inteiro ≥ 0, com stepper +/- |
+| Produção | Produção de leite típica | `annual_milk_yield` | float > 0 — **alvo de calibração, não garantia** |
+| Propriedade | Tamanho da propriedade | `field_size_1`, `field_size_2` (2 campos) | float > 0 cada |
+| Propriedade | Município / localização | `fips_county_code` | inteiro > 0 — ver gap do clima |
+
+São exatamente estes 6 campos (`FarmInputRequest` em `backend/app.py`) — não há campo de nome da fazenda, raça, vacas secas nem busca de município por nome nesta fase (existiam no design de referência, mas não têm equivalente no backend).
+
+**Validação** (`form_validators.dart`): obrigatoriedade, tipo (inteiro/decimal, aceitando vírgula ou ponto), e faixa — verificada ao tentar avançar de etapa. Mensagens em português claro, centralizadas.
+
+**Por dentro:** ao confirmar na etapa de Revisão, o app faz `POST /simulations` com os campos; o backend responde na hora com um `simulation_id` e dispara a simulação em background. A etapa de Confirmação oferece "Acompanhar simulação" (Tela 3) ou "Voltar para minhas fazendas" (Tela 1, onde a nova fazenda aparece com estado "na fila").
+
+> **Gap do clima:** hoje não há gerador de clima a partir da localização — o RuFaS usa um arquivo de clima selecionado. Traduzir "município" → arquivo de clima é trabalho de backend ainda pendente. O campo existe na interface; a tradução completa virá depois.
+
+**Arquivo:** `flutter_app/lib/screens/new_farm_wizard_screen.dart`.
+
+---
+
+## 3. Tradução (backend, Etapa 2)
 
 **O que faz:** converte os poucos campos do produtor na árvore de arquivos JSON/CSV que o RuFaS exige.
 
@@ -40,7 +59,7 @@ São exatamente estes 6 campos (`FarmInputRequest` em `backend/app.py`) — não
 
 ---
 
-## 3. Execução da simulação (backend, Etapa 3)
+## 4. Execução da simulação (backend, Etapa 3)
 
 **O que faz:** roda o RuFaS com a entrada gerada, em dois passos.
 
@@ -63,7 +82,7 @@ São exatamente estes 6 campos (`FarmInputRequest` em `backend/app.py`) — não
 
 ---
 
-## 4. Acompanhamento (frontend, Tela de status)
+## 5. Acompanhamento (frontend, Tela de status)
 
 **O que faz:** acompanha uma simulação em andamento por polling.
 
@@ -77,7 +96,7 @@ São exatamente estes 6 campos (`FarmInputRequest` em `backend/app.py`) — não
 
 ---
 
-## 5. Filtragem de resultados (Tela de resultados, Parte A)
+## 6. Filtragem de resultados (Tela de resultados, Parte A)
 
 **O que faz:** reduz as ~3.322 colunas do resultado ao subconjunto de interesse — mesma lógica do dashboard original, exposta via API.
 
@@ -93,7 +112,7 @@ São exatamente estes 6 campos (`FarmInputRequest` em `backend/app.py`) — não
 
 ---
 
-## 6. Visualização em gráfico (Tela de resultados, Parte B)
+## 7. Visualização em gráfico (Tela de resultados, Parte B)
 
 **O que faz:** plota as variáveis escolhidas como séries temporais.
 
@@ -128,7 +147,7 @@ São exatamente estes 6 campos (`FarmInputRequest` em `backend/app.py`) — não
 
 ---
 
-## 7. Download do resultado completo
+## 8. Download do resultado completo
 
 **O que faz:** permite baixar o CSV completo da simulação (para quem quer os dados brutos, já que a tabela crua não é exposta no app — inadequada para tela pequena).
 
@@ -136,13 +155,15 @@ São exatamente estes 6 campos (`FarmInputRequest` em `backend/app.py`) — não
 
 ---
 
-## 8. Identidade visual (Material 3)
+## 9. Identidade visual
 
-**O que faz:** aplica um tema consistente às 4 telas.
+**O que faz:** aplica um tema consistente a todas as telas.
 
-- `ColorScheme.fromSeed` a partir do verde `#2E7D32`; secundária verde-claro `#A5D6A7`; acento âmbar `#F9A825`.
+- Paleta "editorial de laticínio" (2026-08-31), inspirada num sistema de design de referência — ver `docs/design/README.md`: verde-floresta `#1B4D3E` como cor primária (era `#2E7D32`), verde-claro `#DCEAE1` de apoio, dourado `#F4C15C` de acento (era âmbar `#F9A825`), fundo creme `#FAF7F0`.
+- Tipografia **Work Sans** (pacote `google_fonts`), peso alto (900) nos títulos.
+- Botões, chips e o FAB em formato pílula (`StadiumBorder`); cards sem sombra, com borda fina no lugar.
 - Estilos de card, botão, campo, chip, checkbox e snackbar centralizados.
-- Cores de estado com significado: verde (concluída), âmbar (em andamento), cinza (na fila), vermelho (falha).
+- Cores de estado com significado: verde (concluída), dourado (em andamento), cinza (na fila), vermelho (falha) — `simulation_states.dart` referencia `AppColors`, nunca hex duplicado.
 - Centralizado em `app_theme.dart` — mudar o visual do app inteiro se faz num arquivo.
 
 ---
