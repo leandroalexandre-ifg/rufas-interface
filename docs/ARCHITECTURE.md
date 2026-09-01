@@ -56,6 +56,7 @@ flutter_app/lib/
 - **`fl_chart` para gráficos:** puro Dart, sem dependência nativa — funciona igual nas três plataformas.
 - **Identidade visual própria, não Material 3 padrão:** paleta "editorial de laticínio" (verde-floresta `#1B4D3E`, dourado, creme — ver `docs/design/README.md`) sobre `ColorScheme`/`useMaterial3: true`, com tipografia Work Sans via `google_fonts`. Centralizado em `app_theme.dart`; nenhuma tela hardcoda cor localmente.
 - **Cadastro em wizard, não formulário único:** 3 passos (Rebanho, Produção, Propriedade) + revisão + confirmação, com menu lateral (`app_drawer.dart`) e conceito de "fazenda ativa" (só de UI) na lista — adaptação de um design de referência (decisão de 2026-08-29).
+- **Menu lateral responsivo por plataforma (`kIsWeb`), não por largura de tela:** na web é um painel fixo sempre visível (`AppDrawer(asSidebar: true)`, `Material` + borda à direita) com o conteúdo principal centralizado ao lado; no Android continua como gaveta (`Scaffold.drawer`) atrás do hambúrguer — não faz sentido a web se comportar como app de celular numa tela grande (decisão de 2026-09-01).
 
 ### Resolução de rede por plataforma
 Ponto de atenção específico do Flutter, centralizado em `api_client.dart`:

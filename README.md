@@ -83,10 +83,14 @@ A API sobe em `http://localhost:8000`. Documentação interativa automática em 
 ```bash
 cd flutter_app
 flutter pub get
-flutter run -d chrome                # web
+flutter run -d chrome                       # web — abre uma janela do Chrome já apontada pro app
 # ou
-flutter run -d <emulador_android>    # Android
+flutter run -d web-server --web-port 5050   # web — só serve em http://localhost:5050; abra você mesmo em qualquer aba/navegador
+# ou
+flutter run -d <emulador_android>           # Android
 ```
+
+> **Nota sobre `-d chrome`:** a depuração fica presa à janela específica que o próprio comando abre — se você navegar até a URL numa outra aba/janela, ela carrega em branco (a conexão de debug do Chrome não segue). Se for acessar por uma aba já aberta ou quiser recarregar à vontade, prefira `-d web-server`.
 
 > **Nota de rede:** o app resolve a URL da API por plataforma automaticamente — `localhost:8000` na web, `10.0.2.2:8000` no emulador Android (o emulador não enxerga `localhost` como o host). Ver `flutter_app/lib/core/api_client.dart`.
 

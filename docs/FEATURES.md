@@ -6,7 +6,7 @@ Descrição detalhada de cada funcionalidade: o que faz, como funciona por dentr
 
 ## 1. Lista de fazendas e navegação (Tela 1)
 
-**O que o usuário vê:** a lista de fazendas cadastradas (`GET /simulations`), um cartão por fazenda com estado (chip colorido), botão "Cadastrar nova fazenda", e um menu lateral (`AppDrawer`, ícone de hambúrguer na AppBar).
+**O que o usuário vê:** a lista de fazendas cadastradas (`GET /simulations`), um cartão por fazenda com estado (chip colorido), botão "Cadastrar nova fazenda", e o menu lateral (`AppDrawer`).
 
 **Fazenda ativa:** conceito só de UI (não existe endpoint nem campo correspondente no backend) — o usuário pode marcar uma fazenda como "ativa" na lista ou no menu lateral; a seleção não persiste entre reinícios do app. Como não há campo "nome" de fazenda, o resumo usado como identificador é sempre "N vacas · M bezerras".
 
@@ -15,7 +15,9 @@ Descrição detalhada de cada funcionalidade: o que faz, como funciona por dentr
 - **Ver resultados** — habilitado só quando `state == "done"`.
 - Tocar no cartão (fora dos botões) navega: para a Tela 4 (Resultados) se `done`, senão para a Tela 3 (Status).
 
-**Menu lateral (`AppDrawer`):** mostra a fazenda ativa, permite trocá-la, e tem o atalho "Minhas Fazendas" com contador. Adaptação para celular (gaveta) de um design de referência que usava uma barra lateral fixa — ver `docs/design/README.md`.
+**Menu lateral (`AppDrawer`):** mostra a fazenda ativa, permite trocá-la, e tem o atalho "Minhas Fazendas" com contador. **Comportamento diferente por plataforma** (decisão de 2026-09-01, via `kIsWeb`):
+- **Web/navegador:** painel fixo, sempre visível ao lado do conteúdo — não faz sentido escondê-lo atrás de um hambúrguer numa tela grande. O conteúdo principal ("Minhas fazendas") fica centralizado (largura máxima ~760px) no espaço restante.
+- **Android:** gaveta escondida atrás do ícone de hambúrguer na AppBar — igual à adaptação original para celular de um design de referência que usava uma barra lateral fixa (ver `docs/design/README.md`).
 
 **Arquivos:** `flutter_app/lib/screens/farm_list_screen.dart`, `flutter_app/lib/widgets/app_drawer.dart`.
 
