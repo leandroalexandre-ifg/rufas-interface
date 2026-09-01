@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-/// Paleta de fazenda (ver CLAUDE.md, "Aplicação do design visual"):
-/// verde folha como cor primária, verde-claro como apoio, âmbar como
-/// acento (confirmações / chips ativos), fundo off-white, texto
-/// cinza-escuro. Fonte única de cores/estilos — todas as telas devem
-/// herdar do ThemeData montado aqui, nunca hardcodar cor localmente.
+/// Paleta de fazenda "editorial de laticínio" (ver docs/design/README.md):
+/// verde-floresta como cor primária, verde-claro (tinta do primário) como
+/// apoio, dourado como acento (confirmações / chips ativos / progresso),
+/// fundo creme, texto quase-preto puxado pro verde. Fonte única de
+/// cores/estilos — todas as telas devem herdar do ThemeData montado aqui,
+/// nunca hardcodar cor localmente.
 class AppColors {
   AppColors._();
 
-  static const primaryGreen = Color(0xFF2E7D32);
-  static const lightGreen = Color(0xFFA5D6A7);
-  static const amber = Color(0xFFF9A825);
-  static const background = Color(0xFFFAF9F4);
+  static const primaryGreen = Color(0xFF1B4D3E);
+  static const lightGreen = Color(0xFFDCEAE1);
+  static const amber = Color(0xFFF4C15C);
+  static const background = Color(0xFFFAF7F0);
   static const surface = Color(0xFFFFFFFF);
-  static const textDark = Color(0xFF262B27);
+  static const textDark = Color(0xFF26332C);
 }
 
 class AppTheme {
@@ -35,7 +37,8 @@ class AppTheme {
       error: const Color(0xFFB3261E),
     );
 
-    final baseText = ThemeData.light().textTheme.apply(
+    final workSans = GoogleFonts.workSansTextTheme(ThemeData.light().textTheme);
+    final baseText = workSans.apply(
           bodyColor: AppColors.textDark,
           displayColor: AppColors.textDark,
         );
@@ -45,56 +48,60 @@ class AppTheme {
       colorScheme: colorScheme,
       scaffoldBackgroundColor: AppColors.background,
       textTheme: baseText.copyWith(
-        titleLarge: baseText.titleLarge?.copyWith(fontWeight: FontWeight.w700),
-        titleMedium: baseText.titleMedium?.copyWith(fontSize: 17, fontWeight: FontWeight.w600),
+        headlineSmall: baseText.headlineSmall?.copyWith(fontWeight: FontWeight.w900, letterSpacing: -0.5),
+        titleLarge: baseText.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+        titleMedium: baseText.titleMedium?.copyWith(fontSize: 17, fontWeight: FontWeight.w700),
         bodyLarge: baseText.bodyLarge?.copyWith(fontSize: 16),
         bodyMedium: baseText.bodyMedium?.copyWith(fontSize: 14.5),
       ),
-      appBarTheme: const AppBarTheme(
-        backgroundColor: AppColors.primaryGreen,
-        foregroundColor: Colors.white,
+      appBarTheme: AppBarTheme(
+        backgroundColor: AppColors.background,
+        foregroundColor: AppColors.primaryGreen,
         elevation: 0,
         centerTitle: false,
-        titleTextStyle: TextStyle(
-          color: Colors.white,
+        titleTextStyle: GoogleFonts.workSans(
+          color: AppColors.primaryGreen,
           fontSize: 21,
-          fontWeight: FontWeight.w700,
+          fontWeight: FontWeight.w900,
+          letterSpacing: -0.3,
         ),
-        iconTheme: IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: AppColors.primaryGreen),
       ),
       cardTheme: CardThemeData(
-        elevation: 1.5,
+        elevation: 0,
         color: AppColors.surface,
         surfaceTintColor: Colors.transparent,
-        shadowColor: Colors.black.withValues(alpha: 0.15),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(color: AppColors.primaryGreen.withValues(alpha: 0.14)),
+        ),
         margin: EdgeInsets.zero,
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primaryGreen,
-          foregroundColor: Colors.white,
-          disabledBackgroundColor: AppColors.primaryGreen.withValues(alpha: 0.4),
+          foregroundColor: AppColors.background,
+          disabledBackgroundColor: AppColors.primaryGreen.withValues(alpha: 0.35),
           minimumSize: const Size(64, 52),
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          padding: const EdgeInsets.symmetric(horizontal: 22),
+          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+          shape: const StadiumBorder(),
         ),
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           backgroundColor: AppColors.primaryGreen,
-          foregroundColor: Colors.white,
+          foregroundColor: AppColors.background,
           minimumSize: const Size(64, 52),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: const StadiumBorder(),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.primaryGreen,
           minimumSize: const Size(64, 52),
-          side: const BorderSide(color: AppColors.primaryGreen, width: 1.4),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          side: const BorderSide(color: AppColors.primaryGreen, width: 1.6),
+          shape: const StadiumBorder(),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
@@ -105,42 +112,42 @@ class AppTheme {
       ),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
         backgroundColor: AppColors.primaryGreen,
-        foregroundColor: Colors.white,
-        elevation: 3,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16))),
+        foregroundColor: AppColors.background,
+        elevation: 0,
+        shape: StadiumBorder(),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.surface,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: colorScheme.outline.withValues(alpha: 0.4)),
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: AppColors.primaryGreen.withValues(alpha: 0.25)),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: colorScheme.outline.withValues(alpha: 0.4)),
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: AppColors.primaryGreen.withValues(alpha: 0.25)),
         ),
         focusedBorder: const OutlineInputBorder(
-          borderRadius: BorderRadius.all(Radius.circular(12)),
+          borderRadius: BorderRadius.all(Radius.circular(14)),
           borderSide: BorderSide(color: AppColors.primaryGreen, width: 2),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
           borderSide: BorderSide(color: colorScheme.error, width: 1.4),
         ),
         labelStyle: TextStyle(color: AppColors.textDark.withValues(alpha: 0.75)),
       ),
       chipTheme: ChipThemeData(
-        backgroundColor: AppColors.lightGreen.withValues(alpha: 0.35),
+        backgroundColor: AppColors.lightGreen,
         selectedColor: AppColors.amber,
         disabledColor: colorScheme.outline.withValues(alpha: 0.15),
         checkmarkColor: AppColors.textDark,
         labelStyle: const TextStyle(color: AppColors.textDark, fontWeight: FontWeight.w600),
         secondaryLabelStyle: const TextStyle(color: AppColors.textDark, fontWeight: FontWeight.w700),
         side: BorderSide.none,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        shape: const StadiumBorder(),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       ),
       checkboxTheme: CheckboxThemeData(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
@@ -150,7 +157,7 @@ class AppTheme {
         iconColor: AppColors.primaryGreen,
         textColor: AppColors.textDark,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       ),
       progressIndicatorTheme: const ProgressIndicatorThemeData(
         color: AppColors.primaryGreen,
