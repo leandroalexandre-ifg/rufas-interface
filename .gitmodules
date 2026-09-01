@@ -1,0 +1,3 @@
+[submodule "RuFaS"]
+	path = RuFaS
+	url = https://github.com/RuminantFarmSystems/RuFaS.git

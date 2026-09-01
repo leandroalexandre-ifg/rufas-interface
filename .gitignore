@@ -1,7 +1,8 @@
-# Repositórios vendorizados/externos, cada um com seu próprio remote e
-# histórico — nunca fazem parte deste repo (ver CLAUDE.md, "Plataforma de
-# deploy e repositórios" e "Nova frente: interface produtor -> RuFaS").
-/RuFaS/
+# hf-space/ é um repositório vendorizado/externo à parte, com seu próprio
+# remote e histórico — nunca faz parte deste repo (ver CLAUDE.md,
+# "Plataforma de deploy e repositórios"). RuFaS/ passou a ser um git
+# submodule deste repo (ver "Nova frente: interface produtor -> RuFaS" no
+# CLAUDE.md) — não entra mais aqui.
 /hf-space/
 
 # Ambientes virtuais Python

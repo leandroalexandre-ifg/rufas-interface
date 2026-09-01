@@ -230,6 +230,33 @@ As etapas 1, 2, 3 e 5 ainda serão construídas. Esta seção documenta essa
 frente nova; o restante do CLAUDE.md (contexto, escopo, stack, etc.)
 continua se referindo ao marco do dashboard de filtros (etapa 4).
 
+### RuFaS agora é git submodule deste repositório (decidido em 2026-08-31)
+Até aqui, `RuFaS/` era só um checkout local ignorado pelo git deste repo
+(`/RuFaS/` no `.gitignore`) — o usuário pediu para que o código do RuFaS
+passasse a fazer parte do repositório também, e não apenas existir como
+uma dependência externa invisível pra quem clona o projeto.
+
+Decisão: **git submodule**, não cópia direta do código nem `git subtree`.
+Motivo: o checkout local tinha 11GB no disco e o histórico de commits do
+projeto oficial sozinho já soma ~33 mil commits / 1,6GB — inviável de
+duplicar dentro do histórico deste repo. O submodule guarda só uma
+referência leve (URL do repo oficial + hash de um commit específico), sem
+duplicar esse histórico; quem quiser o código de verdade roda
+`git submodule update --init` (ou clona com `--recurse-submodules`).
+Aponta pro repositório oficial (`github.com/RuminantFarmSystems/RuFaS`),
+fixado no commit que já estava em uso localmente (branch `dev`).
+
+Isso **não contradiz** a decisão de manter `hf-space/` fora deste repo
+(ver "Plataforma de deploy e repositórios" abaixo) — aquele caso era
+especificamente sobre não arriscar estourar a cota de Git LFS do GitHub
+com o CSV de ~900MB versionado ali. Um submodule não copia nem envia
+nenhum dado do RuFaS pra este repo — só a referência —, então não tem
+esse risco.
+
+Nenhum código do backend precisou mudar: `backend/farm_translation.py`
+já apontava `RUFAS_ROOT` para o caminho absoluto `.../RuFaS`, que
+continua sendo exatamente onde o submodule fica.
+
 ### Arquitetura escolhida (decidido em 2026-08-27)
 **Flutter (app) + Python/FastAPI (backend/API)**, comunicando por API.
 Tudo rodando local nesta fase (sem deploy). O app Flutter é o frontend
